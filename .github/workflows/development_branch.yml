@@ -65,31 +65,6 @@ jobs:
         with:
           name: filtered-results
           path: filtered_results.json
-
-        
-  # Convert Pipeline scan results to the SARFI format  
-  import-findings-to-code-scanning-alerts:
-    needs: pipeline-scan
-    runs-on: ubuntu-latest
-    steps:  
-      - name: get scan results
-        uses: actions/download-artifact@v2
-        with:
-          name: PipelineScanResults
-      - name: Convert pipeline scan output to SARIF format
-        id: convert Pipeline results to SARIF format 
-        uses: Veracode/veracode-pipeline-scan-results-to-sarif@v0.1.2
-        with:
-          pipeline-results-json: results.json
-          output-results-sarif: veracode-results.sarif
-          source-base-path-1: "^com/veracode:src/main/java/com/veracode"
-          source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
-          finding-rule-level: "3:1:0"
-
-     # - name: upload SARIF file to repository
-      #  uses: github/codeql-action/upload-sarif@v1
-        #with: # Path to SARIF file relative to the root of the repository
-         # sarif_file: veracode-results.sarif
         
   # Create issues from piepline scan
   import-issues:
@@ -106,9 +81,7 @@ jobs:
         with:
           scan-results-json: 'filtered_results.json'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          source_base_path_1: "^com/veracode:src/main/java/com/veracode" 
-          source_base_path_2: "^WEB-INF:src/main/webapp/WEB-INF"
-          commit-hash: ${{ GITHUB.SHA }}
+          
 
         
   # Run a Software Composition Analysis scan
