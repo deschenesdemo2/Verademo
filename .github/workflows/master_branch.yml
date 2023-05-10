@@ -45,7 +45,7 @@ jobs:
         uses: veracode/veracode-uploadandscan-action@master
         id: upload_and_scan
         with:
-          appname: "Github-VeraDemo"
+          appname: 'GHVerademo'
           createprofile: false
           version: '${{ github.run_id }}'
           filepath: 'verademo.war'
@@ -65,7 +65,7 @@ jobs:
 #        VERACODE_API_KEY_SECRET: '${{ secrets.VERACODE_API_KEY }}'
 #      id: import_flaws
 #      with:
-#        app_name: 'VeraDemo'
+#        app_name: 'GHVerademo'
 #
 #    - uses: actions/upload-artifact@master
 #      with:
