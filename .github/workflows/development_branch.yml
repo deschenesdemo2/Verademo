@@ -73,23 +73,19 @@ jobs:
     name: import flaws
 
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-
-      - name: get flaw file
+      - name: get pipeline-scan results
         uses: actions/download-artifact@v2
         with:
           name: filtered-results
 
-      - name: Flaw importer action step
-        id: import
-        uses: ./
+      - name: import flaws as issues
+        uses: buzzcode/veracode-flaws-to-issues@v1
         with:
           scan-results-json: 'filtered_results.json'
           github-token: ${{ secrets.GH_TOKEN }}
-         # source-base-path_1: "com/veracode:src/main/java/com/veracode" 
-         # source-base-path_2: "WEB-INF:src/main/webapp/WEB-INF"
-         # commit-hash: ${{ GITHUB.SHA }}
+          source-base-path_1: "com/veracode:src/main/java/com/veracode" 
+          source-base-path_2: "WEB-INF:src/main/webapp/WEB-INF"
+          commit-hash: ${{ GITHUB.SHA }}
           
 
         
