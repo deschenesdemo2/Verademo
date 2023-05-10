@@ -46,6 +46,7 @@ jobs:
         id: upload_and_scan
         with:
           appname: 'Github-VeraDemo'
+          createprofile: false
           version: '${{ github.run_id }}'
           filepath: 'verademo.war'
           vid: '${{ secrets.VERACODE_API_ID }}'
