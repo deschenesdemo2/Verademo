@@ -49,7 +49,8 @@ jobs:
           java -jar /opt/veracode/pipeline-scan.jar \
             -vid "${{secrets.VERACODE_API_ID}}" \
             -vkey "${{secrets.VERACODE_API_KEY}}" \
-            --fail_on_severity="Very High, High" \
+            --fail_on_cwe=95,100,978" \
+            --issue_details" \
             --file /tmp/verademo.war \
             -jf results.json \
             -fjf filtered_results.json 
@@ -101,8 +102,8 @@ jobs:
         with:
           scan-results-json: 'filtered_results.json'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          source_base_path_1: "com/veracode:src/main/java/com/veracode" 
-          source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
+          source_base_path_1: "^com/veracode:src/main/java/com/veracode" 
+          source_base_path_2: "^WEB-INF:src/main/webapp/WEB-INF"
           commit-hash: ${{ GITHUB.SHA }}
 
         
