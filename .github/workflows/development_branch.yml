@@ -86,10 +86,10 @@ jobs:
           source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
           finding-rule-level: "3:1:0"
 
-      - name: upload SARIF file to repository
-        uses: github/codeql-action/upload-sarif@v1
-        with: # Path to SARIF file relative to the root of the repository
-          sarif_file: veracode-results.sarif
+     # - name: upload SARIF file to repository
+      #  uses: github/codeql-action/upload-sarif@v1
+        #with: # Path to SARIF file relative to the root of the repository
+         # sarif_file: veracode-results.sarif
         
   # Create issues from piepline scan
   import-issues:
@@ -101,14 +101,14 @@ jobs:
         with:
           name: filtered-results
  
-      #- name: import flaws as issues
-       # uses: buzzcode/veracode-flaws-to-issues@v1
-        #with:
-         # scan-results-json: 'filtered_results.json'
-          #github-token: ${{ secrets.GITHUB_TOKEN }}
-          #source_base_path_1: "^com/veracode:src/main/java/com/veracode" 
-          #source_base_path_2: "^WEB-INF:src/main/webapp/WEB-INF"
-          #commit-hash: ${{ GITHUB.SHA }}
+      - name: import flaws as issues
+        uses: buzzcode/veracode-flaws-to-issues@v1
+        with:
+          scan-results-json: 'filtered_results.json'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          source_base_path_1: "^com/veracode:src/main/java/com/veracode" 
+          source_base_path_2: "^WEB-INF:src/main/webapp/WEB-INF"
+          commit-hash: ${{ GITHUB.SHA }}
 
         
   # Run a Software Composition Analysis scan
