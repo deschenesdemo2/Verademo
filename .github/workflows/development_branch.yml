@@ -100,7 +100,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: filtered-results
-
+ 
       #- name: import flaws as issues
        # uses: buzzcode/veracode-flaws-to-issues@v1
         #with:
