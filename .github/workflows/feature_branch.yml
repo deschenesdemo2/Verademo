@@ -1,7 +1,5 @@
 name: Feature Branch Workflow
 
-
-
 on:
   push:
     branches: [ feature ]
