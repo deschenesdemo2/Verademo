@@ -1,4 +1,4 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
+c# Use the latest 2.1 version of CircleCI pipeline process engine.
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
@@ -64,7 +64,7 @@ jobs:
               -vid $VERACODE_API_ID 
               -vkey $VERACODE_API_KEY 
               -action uploadandscan 
-              -appname VeraDemo 
+              -appname VeraDemo-CircleCI 
               -createprofile false 
               -version CircleCI-$CIRCLE_BUILD_NUM 
               -filepath verademo/target/verademo.war
