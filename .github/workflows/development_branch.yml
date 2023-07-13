@@ -1,6 +1,5 @@
 name: Development Branch Workflow
  
- 
 on: 
   push:
     branches: [ development ]
