@@ -28,7 +28,7 @@ jobs:
       with:
         name: verademo.war
         path: target/verademo.war
-        
+         
 
   # This step will run the Veracode pipeline scan 
   pipeline-scan:
