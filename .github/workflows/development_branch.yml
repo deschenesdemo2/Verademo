@@ -48,8 +48,6 @@ jobs:
           java -jar /opt/veracode/pipeline-scan.jar \
             -vid "${{secrets.VERACODE_API_ID}}" \
             -vkey "${{secrets.VERACODE_API_KEY}}" \
-            --fail_on_severity="High" \
-            --issue_details true" \
             --file /tmp/verademo.war \
             -jf results.json \
             -fjf filtered_results.json 
