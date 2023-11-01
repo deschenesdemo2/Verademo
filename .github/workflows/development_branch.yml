@@ -29,54 +29,54 @@ jobs:
         name: verademo.war
         path: target/verademo.war
 
-pipeline_scan:
-    # needs the build step before this job will start running
-    needs: build
-    runs-on: ubuntu-latest
-    name: pipeline scan
+  pipeline_scan:
+     # needs the build step before this job will start running
+     needs: build
+     runs-on: ubuntu-latest
+     name: pipeline scan
 
-    steps:
-      - name: checkout repo
-        uses: actions/checkout@v3
+     steps:
+       - name: checkout repo
+         uses: actions/checkout@v3
       
       # get the compiled binary from a previous job
-      - name: get archive
-        uses: actions/download-artifact@v3
-        with:
-          name: verademo.war
-          path: /tmp
+       - name: get archive
+         uses: actions/download-artifact@v3
+         with:
+           name: verademo.war
+           path: /tmp
 
       # run the pipeline scan action
-      - name: pipeline-scan action step
-        id: pipeline-scan
-        uses: veracode/Veracode-pipeline-scan-action@v1.0.10
-        with:
-          vid: ${{ secrets.VERACODE_API_ID }}
-          vkey: ${{ secrets.VERACODE_API_KEY }}
-          file: "/tmp/verademo.war" 
-          veracode_policy_name: "HIPAA Policy"
-          fail_build: true
+       - name: pipeline-scan action step
+         id: pipeline-scan
+         uses: veracode/Veracode-pipeline-scan-action@v1.0.10
+         with:
+           vid: ${{ secrets.VERACODE_API_ID }}
+           vkey: ${{ secrets.VERACODE_API_KEY }}
+           file: "/tmp/verademo.war" 
+           veracode_policy_name: "HIPAA Policy"
+           fail_build: true
           
- # Create issues from piepline scan
- import_flaws_job:
-    runs-on: ubuntu-latest
-    needs: pipeline-scan
-    name: import flaws
+  # Create issues from piepline scan
+  import_flaws_job:
+     runs-on: ubuntu-latest
+     needs:  pipeline_scan
+     name: import flaws
 
-    steps:
-      - name: get pipeline-scan results
-        uses: actions/download-artifact@v2
-        with:
+     steps:
+       - name: get pipeline-scan results
+         uses: actions/download-artifact@v2
+         with:
           name: filtered-results
 
-      - name: import flaws as issues
-        uses: buzzcode/veracode-flaws-to-issues@v1
-        with:
-          scan-results-json: 'filtered_results.json'
-          github-token: ${{ secrets.GH_TOKEN }}
-          source-base-path_1: "com/veracode:src/main/java/com/veracode" 
-          source-base-path_2: "WEB-INF:src/main/webapp/WEB-INF"
-          commit-hash: ${{ GITHUB.SHA }}
+       - name: import flaws as issues
+         uses: buzzcode/veracode-flaws-to-issues@v1
+         with:
+           scan-results-json: 'filtered_results.json'
+           github-token: ${{ secrets.GH_TOKEN }}
+           source-base-path_1: "com/veracode:src/main/java/com/veracode" 
+           source-base-path_2: "WEB-INF:src/main/webapp/WEB-INF"
+           commit-hash: ${{ GITHUB.SHA }}
 
         
   # Run a Software Composition Analysis scan
