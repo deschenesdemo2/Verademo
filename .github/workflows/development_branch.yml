@@ -55,7 +55,7 @@ jobs:
            vkey: ${{ secrets.VERACODE_API_KEY }}
            file: "/tmp/verademo.war" 
            veracode_policy_name: "HIPAA Policy"
-           fail_build: true
+           fail_on_severity: "Very High"
           
   # Create issues from piepline scan
   import_flaws_job:
