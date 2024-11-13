@@ -99,9 +99,32 @@ jobs:
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
           commit-hash: ${{ github.sha }}
 
-  veracode-fix:
+  create-pr:
     runs-on: ubuntu-latest
     needs: pipeline-scan
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Create pull request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Create fixes'
+          branch: fix-branch
+          base: development
+          title: 'Fix branch'
+          body: 'Auto-created pull request with fixes.'
+          assignees: ''
+          reviewers: ''
+          team-reviewers: ''
+          milestone: ''
+          labels: ''
+          draft: false
+
+  veracode-fix:
+    runs-on: ubuntu-latest
+    needs: create-pr
     name: create fixes
     permissions: write-all
     steps:
@@ -113,16 +136,6 @@ jobs:
           name: Veracode Pipeline-Scan Results
       - name: Debug - List downloaded files
         run: ls -al
-      - name: Create pull request
-        id: create_pr
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Create fixes
-          branch: fix-branch
-          base: development
-          title: Fix branch
-          body: Auto-created pull request with fixes.
       - name: Create fixes from static findings
         id: convert
         uses: Veracode/veracode-fix@main
