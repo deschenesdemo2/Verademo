@@ -113,6 +113,22 @@ jobs:
           name: Veracode Pipeline-Scan Results
       - name: Debug - List downloaded files
         run: ls -al
+      - name: Create pull request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Create fixes
+          branch: fix-branch
+          base: development
+          title: Fix branch
+          body: Auto-created pull request with fixes.
+          assignees: ''
+          reviewers: ''
+          team-reviewers: ''
+          milestone: ''
+          labels: ''
+          draft: false
       - name: Create fixes from static findings
         id: convert
         uses: Veracode/veracode-fix@main
@@ -130,6 +146,7 @@ jobs:
           files: 'changed'
           codeSuggestion: false
           createPR: true
+          pull_number: ${{ steps.create_pr.outputs.pull_number }}
 
   software-composition-analysis:
     runs-on: ubuntu-latest
