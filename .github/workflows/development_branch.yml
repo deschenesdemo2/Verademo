@@ -1,15 +1,13 @@
 name: Development Branch Workflow
 
-   
 on:
   push:
     branches: [ development ]
   pull_request:
     branches: [ development ] 
 
- 
 jobs:
-  # This step will build the maven application
+  # This step will build the Maven application
   build:
     runs-on: ubuntu-latest
     steps:
@@ -24,12 +22,10 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
     - name: Build with Maven
       run: mvn clean package
-          
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: verademo.war
         path: target/verademo.war
-        
 
   # This step will run the Veracode pipeline scan 
   pipeline-scan:
@@ -55,18 +51,17 @@ jobs:
             -fjf filtered_results.json 
         continue-on-error: true
       - name: save standard results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: PipelineScanResults
           path: results.json
       - name: save filtered results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: filtered-results
           path: filtered_results.json
 
-        
-  # Convert Pipeline scan results to the SARFI format  
+  # Convert Pipeline scan results to the SARIF format  
   import-findings-to-code-scanning-alerts:
     needs: pipeline-scan
     runs-on: ubuntu-latest
@@ -86,7 +81,7 @@ jobs:
         with:
           sarif_file: veracode-results.sarif
         
-  # Create issues from piepline scan
+  # Create issues from pipeline scan
   import-issues:
     needs: pipeline-scan
     runs-on: ubuntu-latest
@@ -95,7 +90,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: filtered-results
-
       - name: import flaws as issues
         uses: buzzcode/veracode-flaws-to-issues@v1
         with:
@@ -105,7 +99,6 @@ jobs:
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
           commit-hash: ${{ GITHUB.SHA }}
 
-        
   # Run a Software Composition Analysis scan
   software-composition-analysis:
     runs-on: ubuntu-latest
@@ -122,7 +115,7 @@ jobs:
     - run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s scan . --update-advisor 2>&1 | tee sca_output.txt
       env:
         SRCCLR_API_TOKEN: ${{secrets.SRCCLR_API_TOKEN}}
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: SCAScanResults
         path: sca_output.txt
