@@ -7,13 +7,13 @@ on:
     branches: [ development ] 
 
 jobs:
-  # This step will build the Maven application
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-java@v3
-      with: 
+      with:
+        distribution: 'zulu'
         java-version: 1.8
     - name: Cache Maven packages
       uses: actions/cache@v4
@@ -22,12 +22,12 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
     - name: Build with Maven
       run: mvn clean package
-    - uses: actions/upload-artifact@v4
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
       with:
         name: verademo.war
         path: target/verademo.war
 
-  # This step will run the Veracode pipeline scan 
   pipeline-scan:
     needs: build
     runs-on: ubuntu-latest
@@ -35,41 +35,42 @@ jobs:
       image: veracode/pipeline-scan:latest
       options: --user root
     steps:
-      - name: get archive
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Get build artifact
         uses: actions/download-artifact@v4
         with:
           name: verademo.war
           path: /tmp
-      - name: pipeline-scan
+      - name: Run pipeline-scan
         run: | 
           java -jar /opt/veracode/pipeline-scan.jar \
-            -vid "${{secrets.VERACODE_API_ID}}" \
-            -vkey "${{secrets.VERACODE_API_KEY}}" \
+            -vid "${{ secrets.VERACODE_API_ID }}" \
+            -vkey "${{ secrets.VERACODE_API_KEY }}" \
             --fail_on_severity="Very High, High" \
             --file /tmp/verademo.war \
             -jf results.json \
             -fjf filtered_results.json 
         continue-on-error: true
-      - name: save standard results
+      - name: Upload standard results
         uses: actions/upload-artifact@v4
         with:
-          name: PipelineScanResults
+          name: Veracode Pipeline-Scan Results
           path: results.json
-      - name: save filtered results
+      - name: Upload filtered results
         uses: actions/upload-artifact@v4
         with:
           name: filtered-results
           path: filtered_results.json
 
-  # Convert Pipeline scan results to the SARIF format  
   import-findings-to-code-scanning-alerts:
     needs: pipeline-scan
     runs-on: ubuntu-latest
-    steps:  
-      - name: get scan results
+    steps:
+      - name: Get scan results
         uses: actions/download-artifact@v4
         with:
-          name: PipelineScanResults
+          name: Veracode Pipeline-Scan Results
       - name: Convert pipeline scan output to SARIF format 
         id: convert
         uses: veracode/veracode-pipeline-scan-results-to-sarif@v0.1.5
@@ -81,34 +82,32 @@ jobs:
         with:
           sarif_file: veracode-results.sarif
 
-  # Create issues from pipeline scan
   import-issues:
     needs: pipeline-scan
     runs-on: ubuntu-latest
     steps:
-      - name: get scan results
+      - name: Get scan results
         uses: actions/download-artifact@v4
         with:
           name: filtered-results
-      - name: import flaws as issues
+      - name: Import flaws as issues
         uses: buzzcode/veracode-flaws-to-issues@v1
         with:
           scan-results-json: 'filtered_results.json'
           github-token: ${{ secrets.GH_TOKEN }}
-          source_base_path_1: "com/veracode:src/main/java/com/veracode" 
+          source_base_path_1: "com/veracode:src/main/java/com/veracode"
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
-          commit-hash: ${{ GITHUB.SHA }}
+          commit-hash: ${{ github.sha }}
 
-  # Veracode Fix step
   veracode-fix:
     runs-on: ubuntu-latest
-    needs: pipeline_scan
+    needs: pipeline-scan
     name: create fixes
     permissions: write-all
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v3
-      - name: get flaw file
+      - name: Get flaw file
         uses: actions/download-artifact@v4
         with:
           name: Veracode Pipeline-Scan Results
@@ -117,8 +116,8 @@ jobs:
         uses: Veracode/veracode-fix@main
         with:
           inputFile: results.json
-          vid: ${{ secrets.VERACODE_API_ID }}
-          vkey: ${{ secrets.VERACODE_API_KEY }}
+          vid: ${{ secrets.VERACODE_API_ID}}
+          vkey: ${{ secrets.VERACODE_API_KEY}}
           source_base_path_1: "com/:src/main/java/com/"
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
           language: java
@@ -130,13 +129,12 @@ jobs:
           codeSuggestion: false
           createPR: true
 
-  # Run a Software Composition Analysis scan
   software-composition-analysis:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-java@v3
-      with: 
+      with:
         java-version: 1.8
     - name: Cache Maven packages
       uses: actions/cache@v4
@@ -145,7 +143,7 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
     - run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s scan . --update-advisor 2>&1 | tee sca_output.txt
       env:
-        SRCCLR_API_TOKEN: ${{secrets.SRCCLR_API_TOKEN}}
+        SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
     - uses: actions/upload-artifact@v4
       with:
         name: SCAScanResults
