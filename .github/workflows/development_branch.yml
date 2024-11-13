@@ -111,6 +111,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Veracode Pipeline-Scan Results
+      - name: Debug - List downloaded files
+        run: ls -al
       - name: Create fixes from static findings
         id: convert
         uses: Veracode/veracode-fix@main
