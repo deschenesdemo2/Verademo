@@ -1,6 +1,6 @@
 ###
 ### Scan Directives for SourceClear
-### 
+###  
 
 #Scan Directives for Update Advisor and Auto-pull Request
 pr_on: low
