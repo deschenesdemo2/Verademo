@@ -124,12 +124,16 @@ jobs:
     env: 
       SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
     steps:
-      - name: Veracode Dependency Scanning
-        uses: veracode/veracode-sca@v2.1.10
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          update_advisor: TRUE
-          url: https://github.com/deschenesdemo2/Verademo
-          fail-on-cvss: 5
-          path: .
-          debug: FALSE
+    - name: Veracode Dependency Scanning
+      uses: veracode/veracode-sca@v2.1.10
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        update_advisor: TRUE
+        url: https://github.com/deschenesdemo2/Verademo
+        path: .
+        debug: TRUE
+        quick: FALSE
+        create-issues: FALSE
+        skip-collectors: FALSE
+        allow-dirty: FALSE
+        recursive: FALSE
