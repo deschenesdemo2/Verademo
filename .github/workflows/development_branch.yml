@@ -154,23 +154,25 @@ jobs:
           codeSuggestion: false
           createPR: true
 
-  software-composition-analysis:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-java@v3
+  Veracode_Agent_Based_SCA:
+   runs-on: ubuntu-latest
+   env: 
+      SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+   steps:
+    - name: Veracode Dependency Scanning
+    # You may pin to the exact commit or the version.
+    # uses: veracode/veracode-sca@d8ce4a08eebf1a6c5e7759c1dc53c1172a3e7e64
+      uses: veracode/veracode-sca@v1.09
       with:
-        distribution: 'zulu'
-        java-version: '17'
-    - name: Cache Maven packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-    - run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s scan . --update-advisor 2>&1 | tee sca_output.txt
-      env:
-        SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
-    - uses: actions/upload-artifact@v4
-      with:
-        name: SCAScanResults
-        path: sca_output.txt
+        # Authorization token to query and create issues
+        github_token: ${{ secrets.GHACTION_TOKEN_SECRET }}
+        # Show update advisor
+        update_advisor: TRUE
+        # A git URL to work with in case the scan is not for the current repository
+        url: https://github.com/cdalomba/Verademo
+        # The maximum allowed cvss in found vulnerabilities to pass the step
+        fail-on-cvss: 5   # optional, default is 10
+        # A path within the repository where the build definition starts
+        path: .   # optional, default is .
+        # Run the SRCCLR in debug mode
+        debug: FALSE  # optional, default is false
