@@ -6,3 +6,4 @@
 pr_on: low
 no_breaking_updates: false
 ignore_closed_prs: true
+ 
