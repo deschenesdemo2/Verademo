@@ -1,14 +1,12 @@
 name: Development Branch Workflow
 
 on: 
-#  push:
-#    branches: [ master, '*' ]
   workflow_dispatch:
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ master, '*' ]
   schedule:
     - cron: '17 5 * * 2'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -102,54 +100,25 @@ jobs:
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
           commit-hash: ${{ github.sha }}
 
-  create-pr:
-    runs-on: ubuntu-latest
+  veracode-auto-pr:
     needs: pipeline-scan
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Create pull request
-        id: create_pr
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'Create fixes'
-          branch: fix-branch
-          base: development
-          title: 'Fix branch'
-          body: 'Auto-created pull request with fixes.'
-
-  veracode-fix:
     runs-on: ubuntu-latest
-    needs: create-pr
-    name: Create Fixes
-    permissions: write-all
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Get flaw file
-        uses: actions/download-artifact@v4
-        with:
-          name: Veracode Pipeline-Scan Results
-      - name: Debug - List downloaded files
-        run: ls -al
-      - name: Create fixes from static findings
-        id: convert
-        uses: Veracode/veracode-fix@main
+      - name: Create PR for Fixes
+        uses: veracode/veracode-fix@main
         with:
           inputFile: results.json
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
+          language: java
+          cwe: 89,117  # Add specific CVEs/CWEs you want to focus on
+          fixType: 'single'
           source_base_path_1: "com/:src/main/java/com/"
           source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
-          language: java
-          cwe: 89,117
-          fixType: 'single'
-          debug: false
           prComment: true
           files: 'changed'
-          codeSuggestion: false
           createPR: true
+          debug: false
 
   Veracode_Agent_Based_SCA:
     runs-on: ubuntu-latest
