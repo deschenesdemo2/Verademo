@@ -125,7 +125,7 @@ jobs:
       SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
     steps:
       - name: Veracode Dependency Scanning
-        uses: veracode/veracode-sca@latest
+        uses: veracode/veracode-sca@v2.1.10
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           update_advisor: TRUE
@@ -133,3 +133,4 @@ jobs:
           fail-on-cvss: 5
           path: .
           debug: TRUE
+          create-issues: true
