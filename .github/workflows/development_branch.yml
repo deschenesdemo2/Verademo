@@ -132,4 +132,4 @@ jobs:
           url: https://github.com/deschenesdemo2/Verademo
           fail-on-cvss: 5
           path: .
-          debug: FALSE
+          debug: TRUE
