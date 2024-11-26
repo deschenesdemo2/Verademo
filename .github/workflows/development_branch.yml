@@ -165,7 +165,7 @@ jobs:
       uses: veracode/veracode-sca@v1.09
       with:
         # Authorization token to query and create issues
-        github_token: ${{ secrets.GHACTION_TOKEN_SECRET }}
+        github_token: ${{ secrets.GH_TOKEN }}
         # Show update advisor
         update_advisor: TRUE
         # A git URL to work with in case the scan is not for the current repository
