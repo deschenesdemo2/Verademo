@@ -1,11 +1,14 @@
 name: Development Branch Workflow
 
 on:
-  push:
-    branches: [ development ]
+#  push:
+#    branches: [ master, '*' ]
+  workflow_dispatch:
   pull_request:
-    branches: [ development ] 
-
+    # The branches below must be a subset of the branches above
+    branches: [ master, '*' ]
+  schedule:
+    - cron: '17 5 * * 2'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -158,7 +161,7 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           update_advisor: TRUE
-          url: https://github.com/cdalomba/Verademo
+          url: https://github.com/deschenesdemo2/Verademo
           fail-on-cvss: 5
           path: .
           debug: FALSE
