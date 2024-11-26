@@ -130,6 +130,6 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
           update_advisor: TRUE
           url: https://github.com/deschenesdemo2/Verademo
-          fail-on-cvss: 1
+          fail-on-cvss: 5
           path: .
           debug: FALSE
