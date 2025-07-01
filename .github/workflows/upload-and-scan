@@ -29,7 +29,8 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload WAR Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: verademo.war
           path: target/verademo.war
@@ -43,13 +44,13 @@ jobs:
       image: veracode/pipeline-scan:latest
       options: --user root
     steps:
-      - name: Get WAR artifact
+      - name: Download WAR Artifact
         uses: actions/download-artifact@v4
         with:
           name: verademo.war
           path: /tmp
 
-      - name: Run pipeline scan
+      - name: Run Veracode Pipeline Scan
         run: |
           java -jar /opt/veracode/pipeline-scan.jar \
             -vid "${{ secrets.VERACODE_API_ID }}" \
@@ -60,13 +61,13 @@ jobs:
             -fjf filtered_results.json
         continue-on-error: true
 
-      - name: Upload standard results
+      - name: Upload Full Results
         uses: actions/upload-artifact@v4
         with:
           name: PipelineScanResults
           path: results.json
 
-      - name: Upload filtered results
+      - name: Upload Filtered Results
         uses: actions/upload-artifact@v4
         with:
           name: filtered-results
@@ -78,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Get scan results
+      - name: Download Scan Results
         uses: actions/download-artifact@v4
         with:
           name: PipelineScanResults
@@ -91,12 +92,12 @@ jobs:
           source-base-path-1: "^com/veracode:src/main/java/com/veracode"
           source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
 
-      - name: Upload SARIF to GitHub Code Scanning
+      - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: veracode-results.sarif
 
-      - name: Upload SARIF artifact
+      - name: Upload SARIF Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VeracodeSARIF
@@ -108,12 +109,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Get filtered scan results
+      - name: Download Filtered Results
         uses: actions/download-artifact@v4
         with:
           name: filtered-results
 
-      - name: Import flaws as issues
+      - name: Import Issues from Flaws
         uses: buzzcode/veracode-flaws-to-issues@v1
         with:
           scan-results-json: 'filtered_results.json'
@@ -141,12 +142,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      - name: Run SCA scan
+      - name: Run SourceClear (SCA)
         run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s scan . --update-advisor 2>&1 | tee sca_output.txt
         env:
           SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
 
-      - name: Upload SCA results
+      - name: Upload SCA Results
         uses: actions/upload-artifact@v4
         with:
           name: SCAScanResults
