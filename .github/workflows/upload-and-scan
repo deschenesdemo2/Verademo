@@ -1,5 +1,5 @@
 name: Upload and Scan using Veracode Docker
-
+ 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push where package-lock.json modifies or pull request events
