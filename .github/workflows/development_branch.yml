@@ -123,6 +123,7 @@ jobs:
   software-composition-analysis:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - run: curl -sSL https://download.sourceclear.com/ci.sh | sh -s scan . --recursive
       env:
         SRCCLR_API_TOKEN: ${{secrets.SRCCLR_API_TOKEN}}
