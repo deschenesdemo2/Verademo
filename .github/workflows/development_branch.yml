@@ -63,75 +63,66 @@ jobs:
           name: filtered-results
           path: filtered_results.json
 
-  import-findings-to-code-scanning-alerts:
-    needs: pipeline-scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get scan results
-        uses: actions/download-artifact@v4
-        with:
-          name: Veracode Pipeline-Scan Results
-      - name: Convert pipeline scan output to SARIF format 
-        id: convert
-        uses: veracode/veracode-pipeline-scan-results-to-sarif@v0.1.5
-        with:
-          pipeline-results-json: results.json
-          source-base-path-1: "^com/veracode:src/main/java/com/veracode"
-          source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
-      - uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: veracode-results.sarif
+  # import-findings-to-code-scanning-alerts:
+  #   needs: pipeline-scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get scan results
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: Veracode Pipeline-Scan Results
+  #     - name: Convert pipeline scan output to SARIF format 
+  #       id: convert
+  #       uses: veracode/veracode-pipeline-scan-results-to-sarif@v0.1.5
+  #       with:
+  #         pipeline-results-json: results.json
+  #         source-base-path-1: "^com/veracode:src/main/java/com/veracode"
+  #         source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
+  #     - uses: github/codeql-action/upload-sarif@v3
+  #       with:
+  #         sarif_file: veracode-results.sarif
 
-  import-issues:
-    needs: pipeline-scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get scan results
-        uses: actions/download-artifact@v4
-        with:
-          name: filtered-results
-      - name: Import flaws as issues
-        uses: buzzcode/veracode-flaws-to-issues@v1
-        with:
-          scan-results-json: 'filtered_results.json'
-          github-token: ${{ secrets.GH_TOKEN }}
-          source_base_path_1: "com/veracode:src/main/java/com/veracode"
-          source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
-          commit-hash: ${{ github.sha }}
+  # import-issues:
+  #   needs: pipeline-scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get scan results
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: filtered-results
+  #     - name: Import flaws as issues
+  #       uses: buzzcode/veracode-flaws-to-issues@v1
+  #       with:
+  #         scan-results-json: 'filtered_results.json'
+  #         github-token: ${{ secrets.GH_TOKEN }}
+  #         source_base_path_1: "com/veracode:src/main/java/com/veracode"
+  #         source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
+  #         commit-hash: ${{ github.sha }}
 
-  veracode-auto-pr:
-    needs: pipeline-scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create PR for Fixes
-        uses: veracode/veracode-fix@main
-        with:
-          inputFile: results.json
-          vid: ${{ secrets.VERACODE_API_ID }}
-          vkey: ${{ secrets.VERACODE_API_KEY }}
-          language: java
-          cwe: 89,117  # Add specific CVEs/CWEs you want to focus on
-          fixType: 'single'
-          source_base_path_1: "com/:src/main/java/com/"
-          source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
-          prComment: true
-          files: 'changed'
-          createPR: true
-          debug: false
+  # veracode-auto-pr:
+  #   needs: pipeline-scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Create PR for Fixes
+  #       uses: veracode/veracode-fix@main
+  #       with:
+  #         inputFile: results.json
+  #         vid: ${{ secrets.VERACODE_API_ID }}
+  #         vkey: ${{ secrets.VERACODE_API_KEY }}
+  #         language: java
+  #         cwe: 89,117  # Add specific CVEs/CWEs you want to focus on
+  #         fixType: 'single'
+  #         source_base_path_1: "com/:src/main/java/com/"
+  #         source_base_path_2: "WEB-INF:src/main/webapp/WEB-INF"
+  #         prComment: true
+  #         files: 'changed'
+  #         createPR: true
+  #         debug: false
 
   # Run a Software Composition Analysis scan
   software-composition-analysis:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
-      with: 
-        java-version: 1.8
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
     - run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s scan . 
       env:
         SRCCLR_API_TOKEN: ${{secrets.SRCCLR_API_TOKEN}}
