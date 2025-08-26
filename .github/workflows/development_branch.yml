@@ -128,7 +128,7 @@ jobs:
       uses: veracode/veracode-sca@v2.1.10
       with:
         github_token: ${{ secrets.GH_TOKEN }}
-        update_advisor: TRUE
+        update_advisor: false
         url: https://github.com/deschenesdemo2/Verademo
         path: .
-        debug: TRUE
+        debug: false
